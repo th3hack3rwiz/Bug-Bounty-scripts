@@ -3,6 +3,7 @@ domain=$1
 file=$2
 
 function jsReconStart(){
+echo "[+] Total JS files loaded: $(cat $1 | wc -l)" | notify -silent
 count=0
 jsfiles=$(cat $1 | wc -l)
 echo -e  "${GREEN}[+] Starting LinkFinder to find JS links and SecretFinder to find some secrets... "
@@ -45,6 +46,30 @@ echo "$(cat newJs | wc -l)New JS Files found!" | notify
 jsReconStart "newJs"
 fi 
 }
+
+function jsGrab {
+echo -e "[+] Total JS files loaded: $(cat $1 | wc -l)" | notify -silent
+mkdir rawJS 2>&1 > /dev/null
+echo -e  "${GREEN}[+] Fetching all JS file for static recon..."
+for i in $(cat $1 | sed 's/^[[:space:]]*//g' | uniq | grep $domain) 
+do 
+name=$(echo -e  $i | md5sum | awk '{print $1}')
+ls rawJS/ | grep $name >/dev/null
+if [ $? -ne 0   ]; then
+echo -e  "${GREY}[+] RUNNING ON $i" | tee -a rawJS/$name
+curl -L --connect-timeout 10 --max-time 10 --insecure --silent $i | js-beautify -i 2> /dev/null >> rawJS/$name 
+if [ $(cat rawJS/$name | wc -l) -lt 4 ] ; then rm rawJS/$name ; fi 
+printf "\n"
+fi
+done
+cd rawJS
+for i in $(grep -rioP "(?<=(\"|\'|\`))\/[a-zA-Z0-9_?&=\/\-\#\.]*(?=(\"|\'|\`))" | grep /api/ ) ; do for j in `seq 1 8` ; do echo $i |  cut -d "/" -f $j | grep -vE ":|^$" ; done ; done | anew -q ../$domain.api_wordlist
+cp ../.scope . 2>&1
+gf urls | inscope | unfurl domains | sort -u | xargs -n1 | anew ../$domain.sub-domains.txt | notify
+cd ..
+if [ ! -s $domain.api_wordlist ]; then echo "[-] No api related words found!" ; rm $domain.api_wordlist ; fi
+}
 jsReconStart "$file"
 rm freshJs
+jsGrab "$file"
 #bash jsSwimmer.sh target.com <js-file-list>
