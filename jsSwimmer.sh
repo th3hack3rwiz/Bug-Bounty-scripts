@@ -21,15 +21,15 @@ echo "">temp
 else 
 cat temp >> $domain.linkFinderOutput.txt
 for j in $(cat temp | grep -vE "^/$|%|\-\-|[[:lower:]]+-[[:lower:]]+-[[:lower:]]+|^[[:digit:]]+|^-|^_|^-[[:digit:]]|^[[:lower:]]+[[:upper:]]|.*,.*|[[:upper:]]+[[:lower:]]+[[:upper:]]+|_|[[:upper:]]+[[:digit:]]+|[[:lower:]]+[[:digit:]][[:digit:]]+[[:lower:]]*|[[:upper:]]+[[:digit:]][[:digit:]]+[[:lower:]]*|[[:alpha:]]+-[[:alpha:]]+-|@|^[[:digit:]]+|\.html$|==$|\.png$|\.jpg$|\.css$|\.gif$|\.pdf$|\.jpeg$|\.png$|\.tif$|\.tiff$|\.ttf$|\.woff$|\.woff2$|\.ico$|\.svg$") ; do
-echo $j |xargs --max-args=1 --replace="{}" echo "$url{}" 2>&1 | grep $domain | sed "s#$domain\/*#$domain\/#g" | anew jsEndpointsx | wc -l >add
+echo $j |xargs --max-args=1 --replace="{}" echo "$url{}" 2>&1 | grep $domain | sed "s#$domain\/*#$domain\/#g" | anew $domain.jsEndpointsx | wc -l >add
 count=$(($count + $(cat add)))
 rm add
 done
 rm temp
 fi
 done < $1
-ffuf -s -u FUZZ -w jsEndpointsx -t 200 -mc 200,301,302,403 -sa -fs 0 -fr "Not Found" -of csv -o testx | tee endpoints
-rm jsEndpointsx
+ffuf -s -u FUZZ -w $domain.jsEndpointsx -t 200 -mc 200,301,302,403 -sa -fs 0 -fr "Not Found" -of csv -o testx | tee endpoints
+rm $domain.jsEndpointsx
 cat endpoints | grep -E ".js$" | sed 's/.*http/http/g' | fff > freshJs
 rm endpoints
 cat freshJs | grep -E "200$" | tr -d '200' | xargs -n1 | anew $file | tee newJs
@@ -47,3 +47,4 @@ fi
 }
 jsReconStart "$file"
 rm freshJs
+#bash jsSwimmer.sh target.com <js-file-list>
