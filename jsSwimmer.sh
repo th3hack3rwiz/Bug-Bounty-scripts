@@ -29,7 +29,7 @@ done
 rm temp
 fi
 done < $1
-ffuf -s -u FUZZ -w $domain.jsEndpointsx -t 200 -mc 200,301,302,403 -sa -fs 0 -fr "Not Found" -of csv -o testx | tee endpoints
+ffuf -s -u FUZZ -w $domain.jsEndpointsx -t 200 -mc 200,301,302,403,401 -sa -fs 0 -fr "Not Found" -of csv -o testx | tee endpoints
 rm $domain.jsEndpointsx
 cat endpoints | grep -E ".js$" | sed 's/.*http/http/g' | fff > freshJs
 rm endpoints
@@ -62,11 +62,15 @@ if [ $(cat rawJS/$name | wc -l) -lt 4 ] ; then rm rawJS/$name ; fi
 printf "\n"
 fi
 done
+#creating wordlists
 cd rawJS
 for i in $(grep -rioP "(?<=(\"|\'|\`))\/[a-zA-Z0-9_?&=\/\-\#\.]*(?=(\"|\'|\`))" | grep /api/ ) ; do for j in `seq 1 8` ; do echo $i |  cut -d "/" -f $j | grep -vE ":|^$" ; done ; done | anew -q ../$domain.api_wordlist
 cp ../.scope . 2>&1
 gf urls | inscope | unfurl domains | sort -u | xargs -n1 | anew ../$domain.sub-domains.txt | notify
 cd ..
+for i in `seq 1 8` ; do cat $domain.linkFinderOutput.txt | grep "^/" | cut -d "/" -f $i | sort -u | grep -Ev "%|\-\-|[[:lower:]]+-[[:lower:]]+-[[:lower:]]+|^[[:digit:]]+|^-|^_|^-[[:digit:]]|^[[:lower:]]+[[:upper:]]|.*,.*|[[:upper:]]+[[:lower:]]+[[:upper:]]+|_|[[:upper:]]+[[:digit:]]+|[[:lower:]]+[[:digit:]][[:digit:]]+[[:lower:]]*|[[:upper:]]+[[:digit:]][[:digit:]]+[[:lower:]]*|[[:alpha:]]+-[[:alpha:]]+-|^[[:digit:]]+|\.html$|==$|\.png$|\.jpg$|\.css$|\.gif$|\.pdf$|\.js$|\.jpeg$|\.tif$|\.tiff$|\.ttf$|\.woff$|\.woff2$|\.ico$|\.svg$|\.txt$" | grep -v ^$ | sed 's/://g' | sort -u | anew -q $domain.linkfinderWordlist.txt ; done
+cat $domain.linkfinderWordlist.txt | anew -q $domain.paths-wordlist.txt
+rm $domain.linkfinderWordlist.txt
 if [ ! -s $domain.api_wordlist ]; then echo "[-] No api related words found!" ; rm $domain.api_wordlist ; fi
 }
 jsReconStart "$file"
