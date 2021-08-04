@@ -1,3 +1,4 @@
+#!/bin/bash
 airmon-ng stop wlan0mon >/dev/null 2>&1
 airmon-ng check kill
 ifconfig wlan0 down
